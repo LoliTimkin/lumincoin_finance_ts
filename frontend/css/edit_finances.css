@@ -1,0 +1,49 @@
+.content {
+    padding: 0 60px;
+}
+
+.custom-page-name {
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 100px;
+    margin-bottom: 40px;
+}
+
+.form-control {
+    width: 397px;
+    padding: 6px 16px;
+    box-sizing: border-box;
+}
+
+
+.form-control::placeholder {
+    font-size: 15px;
+    color: #6c757d;
+}
+
+.custom-action {
+    margin-top: 25px;
+}
+
+.custom-action .btn {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 15px;
+}
+
+.custom-action .btn-danger {
+    margin-left: 10px;
+}
+
+.custom-input-group {
+    max-width: 397px;
+}
+
+.custom-input-group .custom-input:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+
+
+
+

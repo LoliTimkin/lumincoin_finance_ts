@@ -1,0 +1,55 @@
+.content {
+    padding: 0 60px;
+}
+
+.custom-page-name {
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 100px;
+    margin-bottom: 40px;
+}
+
+.card {
+    padding: 4px;
+}
+
+.card-title  {
+   color: #290661
+}
+
+.card .btn {
+    font-size: 14px;
+    padding: 11px 16px;
+}
+
+.card .btn-danger {
+    margin-left: 10px;
+}
+
+.modal-content {
+    width: 578px;
+    padding: 24px;
+}
+
+.modal-body {
+    width: 532px;
+    color: #290661;
+    font-size: 20px;
+}
+
+.modal-footer {
+    border-top: 0;
+    justify-content: center;
+    padding: 4px;
+    margin-bottom: 8px;
+
+}
+
+.modal-footer .btn {
+    font-size: 14px;
+}
+
+.modal-footer .btn-danger {
+    margin-left: 8px;
+}
+

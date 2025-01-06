@@ -1,0 +1,90 @@
+
+.content {
+    padding: 0 60px;
+}
+
+.custom-page-name {
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 100px;
+    margin-bottom: 40px;
+}
+
+.custom-action {
+    margin-top: 25px;
+    margin-bottom: 40px;
+}
+
+.custom-action .btn {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 15px;
+}
+
+.custom-action .btn-danger {
+    margin-left: 10px;
+}
+
+.custom-filters {
+    margin-bottom: 40px;
+}
+
+.custom-filters .btn {
+    margin-right: 20px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.custom-text-color {
+    color: #6C757D;
+}
+
+.custom-filters span {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.table {
+    font-size: 16px;
+}
+
+.table > th {
+    color: #052c65;
+}
+
+.table > :not(tbody) > * > * {
+    --bs-table-color-state: #052c65;
+}
+
+
+.modal-content {
+    width: 578px;
+    padding: 24px;
+}
+
+.modal-body {
+    width: 532px;
+    color: #290661;
+    font-size: 20px;
+}
+
+.modal-footer {
+    border-top: 0;
+    justify-content: center;
+    padding: 4px;
+    margin-bottom: 8px;
+
+}
+
+.modal-footer .btn {
+    font-size: 14px;
+}
+
+.modal-footer .btn-danger {
+    margin-left: 8px;
+}
+
+
+
+
+

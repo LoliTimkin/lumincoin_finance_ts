@@ -1,0 +1,130 @@
+
+:root {
+    --bs-link-color: #052c65; /* Новый цвет для ссылок nav */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    color: #052c65;
+}
+
+.logo {
+    padding-top: 40px;
+    padding-bottom: 20px;
+    margin-bottom: 60px;
+}
+
+.logo img {
+    width: 98px;
+    height: 40px;
+}
+
+.custom-sidebar {
+    height: 100vh
+}
+
+.custom-sidebar-panel {
+    height: 40%;
+}
+
+.row .nav {
+    padding-right: 0;
+}
+
+.nav {
+    margin: 0 auto;
+    min-width: 193px;
+}
+
+.nav-pills .nav-link {
+    min-width: 193px;
+}
+
+.nav-item {
+
+}
+
+.nav-link img, .nav-link svg {
+    vertical-align: baseline;
+    margin-right: 1px;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.custom-dropdown-toggle {
+    height: 13px;
+    margin-right: 16px;
+    display: inline-block;
+}
+
+.show .custom-dropdown-toggle {
+    transform: rotate(90deg);
+}
+
+.custom-nav-link {
+    display: flex;
+    align-items: center; /* Выровнять текст и картинку по центру по вертикали */
+}
+
+.custom-nav-link img, .custom-nav-link svg {
+    margin-left: auto; /* Сдвиг изображения вправо */
+}
+
+.dropdown-menu {
+    --bs-dropdown-padding-y: 0px;
+}
+
+.custom-balance {
+    margin-bottom: 20px;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
+
+.custom-balance span {
+    color: #0d6efd
+}
+
+.custom-user {
+    padding: 20px 20px 40px;
+    cursor: pointer;
+    position: relative;
+}
+
+.custom-user img {
+    margin-right: 16px;
+}
+
+.logout {
+    display: none;
+    border: grey;
+    position: absolute;
+    background-color: #d9d9d9;
+    top: 0;
+    left: 100%;
+    padding: 20px 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.logout a {
+ text-decoration: none;
+ color: #052c65;
+}
+
+.custom-user:hover .logout {
+    display: block;
+}
+
+.logout:hover {
+    background-color: #e8e7e7;
+}
+

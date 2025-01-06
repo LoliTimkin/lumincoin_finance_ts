@@ -1,0 +1,33 @@
+
+.content {
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.custom-page-name {
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 100px;
+    margin-left: 60px;
+    margin-bottom: 60px;
+}
+
+.custom-filters {
+    margin-left: 60px;
+    margin-bottom: 139px;
+}
+
+.custom-filters .btn {
+    margin-right: 20px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.custom-text-color {
+    color: #6C757D;
+}
+
+.custom-filters span {
+    font-size: 16px;
+    font-weight: 600;
+}

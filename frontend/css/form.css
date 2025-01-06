@@ -1,0 +1,23 @@
+.custom-main-y {
+    margin-top: 313px;
+    margin-bottom: 313px;
+}
+
+.logo {
+    margin-bottom: 60px;
+}
+
+h1 {
+    font-family: Roboto, sans-serif;
+    font-size: 40px;
+    color: #052c65;
+    margin-bottom: 10px;
+}
+
+.btn-custom {
+    margin-top: 20px;
+}
+
+.form-link {
+    margin-top: 10px;
+}
