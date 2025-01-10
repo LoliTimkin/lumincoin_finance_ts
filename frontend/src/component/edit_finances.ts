@@ -1,17 +1,28 @@
 import {CustomHttp} from "../services/custom-http";
 import config from "../../config/config";
+import {CategoryResponseType} from "../../types/category-response.type";
+import {OperationsResponseType} from "../../types/operations-responce.type";
+import {DefaultResponseType} from "../../types/default-response.type";
 
 export class EditFinances {
-    // Находим все кнопки с классом 'edit-btn'
+    private createButton: HTMLElement | null;
+    private removeModalButton: HTMLElement | null;
+    readonly page: "expenses" | "finances";
+    readonly typeOfCategory: "expense" | "income";
+    private data: any[];
+    private editButtons: NodeListOf<HTMLElement>;
+    private removeButtons: NodeListOf<HTMLElement>;
 
     constructor(page) {
-         //this.typeOfCategory = ""
          this.createButton = document.getElementById('create_item')
-         const that = this
+         const that: EditFinances = this
          this.removeModalButton = document.getElementById('modal-remove-category')
-         this.removeModalButton.addEventListener('click', function() {
-             that.deleteCategory()
-         })
+
+        if (this.removeModalButton) {
+            this.removeModalButton.addEventListener('click', function() {
+                that.deleteCategory()
+            })
+        }
 
          this.page = page
 
@@ -22,31 +33,10 @@ export class EditFinances {
         }
 
         this.data = []
-/*         this.data = [
-            { "id": 1, "title": "Депозиты" },
-            { "id": 2, "title": "Зарплата" },
-            { "id": 3, "title": "Сбережения" },
-            { "id": 4, "title": "Инвестиции" }
-        ];
-        //const response = CustomHttp.request(config.host + '/categories/income');
-        //console.log(response)
-        if (page === "expenses") {
-            this.data = [
-                { "id": 1, "title": "Еда" },
-                { "id": 2, "title": "Жилье" },
-                { "id": 3, "title": "Здоровье" },
-                { "id": 4, "title": "Кафе" },
-                { "id": 5, "title": "Авто" },
-                { "id": 6, "title": "Одежда" },
-                { "id": 7, "title": "Развлечения" },
-                { "id": 8, "title": "Счета" },
-                { "id": 9, "title": "Спорт" }
-            ];
-        }*/
-         this.cardsGenerator()
+        this.cardsGenerator()
     }
 
-    editButtonHandler() {
+    private editButtonHandler(): void {
         this.editButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 event.preventDefault(); // Предотвращаем стандартное действие ссылки
@@ -76,40 +66,44 @@ export class EditFinances {
             });
         });
 
-        this.createButton.addEventListener('click',  (event) => {
-            if (this.page === "expenses")  {
-                window.location.href = '#/create_expenses';
-            } else {
-                window.location.href = '#/create_finances';
-            }
-        })
+        if (this.createButton) {
+            this.createButton.addEventListener('click',  (event) => {
+                if (this.page === "expenses")  {
+                    window.location.href = '#/create_expenses';
+                } else {
+                    window.location.href = '#/create_finances';
+                }
+            })
+        }
     }
 
-    async cardsGenerator() {
-
+    private async cardsGenerator(): Promise<void> {
         // Получаем данные с сервера и добавляем в исходный набор данных
         try {
-            const result = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}`,
+            const result: CategoryResponseType[] = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}`,
                 'GET')
             if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
+                //if (result.error) {
+                if (result.length < 0) {
+                    //throw new Error(result.message);
+                    console.log("категорий нет")
                 }
 
                 this.data = this.data.concat(result)
             }
         } catch (error) {
             return console.log(error)
-            }
+        }
 
         // Получаем контейнер для карточек
-        const cardsContainer = document.getElementById('cards-container');
-        // Проходим по каждому элементу данных и добавляем карточку в контейнер
-        this.data.forEach(item => {
-            const card = this.createCard(item);
-            cardsContainer.prepend(card);
-        });
-
+        const cardsContainer: HTMLElement | null = document.getElementById('cards-container');
+        if (cardsContainer) {
+            // Проходим по каждому элементу данных и добавляем карточку в контейнер
+            this.data.forEach(item => {
+                const card: HTMLDivElement = this.createCard(item);
+                cardsContainer.prepend(card);
+            });
+        }
         //  только после рендеринга карточек вешаем обработчики, так как данные с сервера по ним
         // асинхронный код
         this.editButtons = document.querySelectorAll('.btn-edit');
@@ -118,8 +112,8 @@ export class EditFinances {
         this.editButtonHandler()
     }
 
-    createCard(item) {
-        const card = document.createElement('div');
+    private createCard(item): HTMLDivElement {
+        const card: HTMLDivElement = document.createElement('div');
         card.classList.add('col');
         card.innerHTML = `
       <div class="card">
@@ -137,38 +131,38 @@ export class EditFinances {
         return card;
     }
 
-    async deleteCategory() {
-        const hash = window.location.hash;
-        const queryString = hash.split('?')[1];
-        const params = new URLSearchParams(queryString);
-        const categoryId = params.get('id');
-        //document.getElementById('category-name-input').value = categoryName || '';
-        const categoryName = params.get('category')
+    private async deleteCategory(): Promise<void> {
+        const hash: string = window.location.hash;
+        const queryString: string = hash.split('?')[1];
+        const params: URLSearchParams = new URLSearchParams(queryString);
+        const categoryId: string = params.get('id');
+        const categoryName:string = params.get('category')
 
         try {
             //const result = await CustomHttp.request(config.host + `/operations?period=${period}`,
-            const result = await CustomHttp.request(config.host + `/operations?period=all`,
+            const result: OperationsResponseType[]  = await CustomHttp.request(config.host + `/operations?period=all`,
                 'GET',
             )
             if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
+                ///if (result.error) {
+                if (result.length < 0) {
+                    //throw new Error(result.message);
+                        console.log("операций нет")
                 }
-                const operationsData = result
+                const operationsData: OperationsResponseType[] = result
                 console.log(operationsData)
                 //this.operationsDataByCategory
                 operationsData.forEach(operation => {
                     if (operation.category === categoryName) {this.deleteOperationById(operation.id)}
                 })
                 //console.log(this.operationsDataByCategory)
-
             }
         } catch (error) {
             return console.log(error)
         }
 
         try {
-            const result = await CustomHttp.request(`http://localhost:3000/api/categories/${this.typeOfCategory}/${categoryId}`,
+            const result: DefaultResponseType = await CustomHttp.request(`http://localhost:3000/api/categories/${this.typeOfCategory}/${categoryId}`,
                 'DELETE')
             if (result) {
                 if (result.error) {
@@ -180,10 +174,10 @@ export class EditFinances {
         }
     }
 
-    async deleteOperationById(operationId) {
+    private async deleteOperationById(operationId) {
 
         try {
-            const result = await CustomHttp.request(config.host + `/operations/${operationId}`,
+            const result: DefaultResponseType = await CustomHttp.request(config.host + `/operations/${operationId}`,
                 'DELETE',
             )
             if (result) {

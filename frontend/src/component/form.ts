@@ -1,7 +1,15 @@
 import {CustomHttp} from "../services/custom-http";
 import {Auth} from "../services/auth";
+import {FormFieldType} from "../../types/form-field.type";
+import {DefaultResponseType} from "../../types/default-response.type";
+import {SignupResponseType} from "../../types/signup-response.type";
+import {LoginResponseType} from "../../types/login-response.type";
 
 export class Form {
+    private readonly processElement: HTMLElement | null;
+    private readonly page: "signup" | "login";
+    private fields: FormFieldType[];
+
     constructor(page) {
         this.processElement = null;
         this.page = page;
@@ -34,21 +42,25 @@ export class Form {
                 }
             )
         }
-        const that = this;
+        const that: Form = this;
         this.fields.forEach(item => {
             item.element = document.getElementById(item.id);
-            item.element.onchange = function () {
-                that.validateField.call(that, item, this);
+            if (item.element) {
+                item.element.onchange = function () {
+                    that.validateField.call(that, item, this as HTMLInputElement);
+                }
             }
         })
         this.processElement = document.getElementById('process');
-        this.processElement.onclick = function () {
-            that.processForm();
+        if (this.processElement) {
+            this.processElement.onclick = function () {
+                that.processForm();
+            }
         }
 
     }
 
-    validateField(field, element) {
+    private validateField(field: FormFieldType, element: HTMLInputElement): void {
         if (!element.value || !element.value.match(field.regex)) {
             element.style.borderColor = 'red';
             field.valid = false;
@@ -59,35 +71,35 @@ export class Form {
         this.validateForm();
     }
 
-    validateForm() {
-        const validForm = this.fields.every(item => item.valid);
-        if (validForm) {
+    private validateForm() {
+        const validForm: boolean = this.fields.every(item => item.valid);
+        if (validForm && this.processElement) {
             this.processElement.removeAttribute('disabled');
-        } else {
+        } else if (this.processElement) {
             this.processElement.setAttribute('disabled', 'disabled');
         }
         return validForm;
     }
 
-    async processForm() {
+    private async processForm(): Promise<void> {
         if (this.validateForm()) {
-            const email = this.fields.find(item => item.name === 'email').element.value;
-            const password = this.fields.find(item => item.name === 'password').element.value;
+            const email: HTMLInputElement = this.fields.find(item => item.name === 'email')?.element as HTMLInputElement;
+            const password: HTMLInputElement = this.fields.find(item => item.name === 'password')?.element as HTMLInputElement;
 
             if (this.page === 'signup') {
                 try {
 
-                    const result = await CustomHttp.request('http://localhost:3000/api/signup', 'POST', {
-                        name: this.fields.find(item => item.name === 'name').element.value,
+                    const result: DefaultResponseType | SignupResponseType = await CustomHttp.request('http://localhost:3000/api/signup', 'POST', {
+                        name: (this.fields.find(item => item.name === 'name')?.element as HTMLInputElement).value,
                         lastName: "default",
-                        email: email,
-                        password: password,
-                        passwordRepeat: password
+                        email: email.value,
+                        password: password.value,
+                        passwordRepeat: password.value
                     })
 
                     if (result) {
-                        if (result.error || !result.user.id) {
-                            throw new Error(result.message);
+                        if ((result as DefaultResponseType).error) {
+                            throw new Error((result  as DefaultResponseType).message);
                         }
                     }
                 } catch (error) {
@@ -97,21 +109,21 @@ export class Form {
             }
 
             try {
-                const result = await CustomHttp.request('http://localhost:3000/api/login', 'POST', {
-                    email: email,
-                    password: password,
+                const result: DefaultResponseType | LoginResponseType = await CustomHttp.request('http://localhost:3000/api/login', 'POST', {
+                    email: email.value,
+                    password: password.value,
                 })
 
                 if (result) {
-                    if (result.error || !result.tokens.accessToken || !result.tokens.refreshToken
-                        || !result.user.id || !result.user.name) {
-                        throw new Error(result.message);
+                    if ((result as DefaultResponseType).error ) {
+                        throw new Error((result as DefaultResponseType).message);
                     }
-                    Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
+
+                    Auth.setTokens((result as LoginResponseType).tokens.accessToken, (result as LoginResponseType).tokens.refreshToken);
                     Auth.setUserInfo({
-                        userId: result.user.id,
-                        email: email,
-                        name: result.user.name
+                        userId: (result as LoginResponseType).user.id,
+                        email: email.value,
+                        name: (result as LoginResponseType).user.name
                     })
                     location.href = '#/'
                 }
