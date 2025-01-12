@@ -9,18 +9,26 @@ import {
     Legend,
     Title
 } from 'chart.js';
+import {OperationsResponseType} from "../../types/operations-responce.type";
 
 Chart.register(PieController, ArcElement, Tooltip, Legend, Title);
 
 export class Main {
+    private dateRangeBtn: HTMLElement | null;
+    private incomeCategoryToPercent: Object;
+    private expenseCategoryToPercent: Object;
+    private data: OperationsResponseType[];
+    private myChart: Chart;
+    private myChart2: Chart;
+
     constructor() {
 
-        let calendarDateFrom = document.getElementById('calendarFrom')
-        let calendarDateTo = document.getElementById('calendarTo')
+        let calendarDateFrom: HTMLElement | null = document.getElementById('calendarFrom')
+        let calendarDateTo: HTMLElement | null = document.getElementById('calendarTo')
         this.dateRangeBtn = document.getElementById('range-calendar')
 
-        const buttons = document.querySelectorAll(".filter-button"); // Все кнопки
-        let activeButton = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
+        const buttons: NodeListOf<HTMLButtonElement> = document.querySelectorAll(".filter-button"); // Все кнопки
+        let activeButton: HTMLButtonElement = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
 
         this.incomeCategoryToPercent = {} // свойство для обработанных данных - доходы
         this.expenseCategoryToPercent = {} // свойство для обработанных данных - расходы
@@ -30,7 +38,7 @@ export class Main {
             mode: "range", // Режим выбора диапазона
             dateFormat: "Y-m-d",
             onClose: (selectedDates)=> {
-                if (selectedDates.length === 2) {
+                if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
                     // Если выбраны обе даты, обновляем кнопки
                     const startDate = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
                     const endDate = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
@@ -49,7 +57,7 @@ export class Main {
         }
 
 // Назначить обработчик для всех кнопок
-        buttons.forEach((button) => {
+        buttons.forEach((button: HTMLButtonElement) => {
             button.addEventListener("click", () => {
                 if (button !== activeButton) {
                     if (activeButton) {
@@ -60,35 +68,32 @@ export class Main {
                     button.classList.remove("btn-outline-secondary") //  Удаление неактивного состояния
                     activeButton = button; // Обновление активной кнопки
                     if (button !== this.dateRangeBtn) {
-                        this.getOperationsByFilter(button.dataset.filter); // Применение фильтра
+                        this.getOperationsByFilter(button.dataset.filter);// Применение фильтра
                     }
-
                 }
             });
         });
     }
 
-    async getOperationsByFilter(period, startDate = null, endDate = null ){
-        const queryParams = new URLSearchParams();
+    private async getOperationsByFilter(period: string, startDate?: string, endDate?: string ): Promise<void> {
+        const queryParams: URLSearchParams = new URLSearchParams();
         queryParams.append("period", period)
 
-        if (period === "interval") {
+        if (period === "interval" && startDate && endDate) {
             queryParams.append("dateFrom", startDate)
             queryParams.append("dateTo", endDate)
         }
 
         try {
-            //const result = await CustomHttp.request(config.host + `/operations?period=${period}`,
-            const result = await CustomHttp.request(config.host + `/operations?${queryParams}`,
+            const result: OperationsResponseType[] = await CustomHttp.request(config.host + `/operations?${queryParams}`,
                 'GET',
             )
             if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
-                }
+                //if (result.error) {
+                //    throw new Error(result.message);
+                //}
                 this.data = result
                 console.log(this.data)
-                //this.renderingPage()
                 this.calculateStatistics(this.data)
             }
         } catch (error) {
@@ -97,19 +102,19 @@ export class Main {
 
     }
 
-    calculateStatistics(testData) {
+    private calculateStatistics(testData: OperationsResponseType[]): void {
         console.log(testData)
-        const dataIncome = testData.filter(item=> {
+        const dataIncome: OperationsResponseType[] = testData.filter(item  => {
             return item.type === "income"
         })
         console.log(dataIncome)
-        const dataExpense = testData.filter(item=> {
+        const dataExpense: OperationsResponseType[] = testData.filter(item => {
             return item.type === "expense"
         })
         console.log(dataExpense)
 
-        const incomeCategoryCount = {};
-        const expenseCategoryCount = {};
+        const incomeCategoryCount: object = {};
+        const expenseCategoryCount: object = {};
 
         dataIncome.forEach(item => {
             incomeCategoryCount[item.category] = (incomeCategoryCount[item.category] || 0) + 1;
@@ -123,13 +128,13 @@ export class Main {
         console.log(expenseCategoryCount)
 
         this.incomeCategoryToPercent = {}
-        //const incomeCategoryToPercent = {};
+
         for (let category in incomeCategoryCount) {
             this.incomeCategoryToPercent[category] = ((incomeCategoryCount[category] / dataIncome.length) * 100).toFixed(2) ;
         }
 
         this.expenseCategoryToPercent = {}
-        //const expenseCategoryToPercent = {};
+
         for (let category in expenseCategoryCount) {
             this.expenseCategoryToPercent[category] = ((expenseCategoryCount[category] / dataExpense.length) * 100).toFixed(2);
         }
@@ -140,8 +145,8 @@ export class Main {
     }
 
     createCharts() {
-        const ctx = document.getElementById('myChart');
-        const ctx2 = document.getElementById('myChart2');
+        const ctx: HTMLElement | null = document.getElementById('myChart');
+        const ctx2: HTMLElement | null = document.getElementById('myChart2');
 
         console.log(Object.values(this.incomeCategoryToPercent))
         const incomeData = {
@@ -181,7 +186,7 @@ export class Main {
         if (this.myChart) {
             this.myChart.destroy(); // Удаляем предыдущий график
         }
-        this.myChart = new Chart(ctx, {
+        this.myChart = new Chart(ctx as HTMLCanvasElement, {
             type: 'pie',
             data: incomeData,
             options: {
@@ -196,7 +201,7 @@ export class Main {
          if (this.myChart2) {
             this.myChart2.destroy(); // Удаляем предыдущий график
         }
-        this.myChart2 = new Chart(ctx2, {
+        this.myChart2 = new Chart(ctx2 as HTMLCanvasElement, {
             type: 'pie',
             data: expenseData,
             options: {

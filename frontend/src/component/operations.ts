@@ -1,32 +1,40 @@
 import {CustomHttp} from "../services/custom-http";
 import config from "../../config/config";
+import {OperationsResponseType} from "../../types/operations-responce.type";
+import {DefaultResponseType} from "../../types/default-response.type";
 //import flatpickr from "flatpickr";
 //import "flatpickr/dist/flatpickr.min.css";
 //const flatpickr = require("flatpickr");
 
 export class Operations {
+    private createButtonIncome: HTMLElement | null;
+    private createButtonExpenses: HTMLElement | null;
+    private removeModalButton: HTMLElement | null;
+    private readonly dateRangeBtn: HTMLElement | null;
+    private data: OperationsResponseType[];
+
+
     constructor() {
         this.createButtonIncome = document.getElementById('create-button-income')
         this.createButtonExpenses = document.getElementById('create-button-expense')
         this.removeModalButton = document.getElementById('modal-remove-operation')
-        let calendarDateFrom = document.getElementById('calendarFrom')
-        let calendarDateTo = document.getElementById('calendarTo')
+        let calendarDateFrom: HTMLElement | null = document.getElementById('calendarFrom')
+        let calendarDateTo: HTMLElement | null = document.getElementById('calendarTo')
         this.dateRangeBtn = document.getElementById('range-calendar')
 
         //document.addEventListener("DOMContentLoaded", () => {
-            const buttons = document.querySelectorAll(".filter-button"); // Все кнопки
-            let activeButton = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
-            //const calendars = document.querySelector(".calendar")
+            const buttons: NodeListOf<HTMLButtonElement> = document.querySelectorAll(".filter-button"); // Все кнопки
+            let activeButton: HTMLButtonElement = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
 
         flatpickr(this.dateRangeBtn, {
             mode: "range", // Режим выбора диапазона
             //dateFormat: "d.m.Y", // Формат отображения даты
             dateFormat: "Y-m-d",
             onClose: (selectedDates)=> {
-                if (selectedDates.length === 2) {
+                if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
                     // Если выбраны обе даты, обновляем кнопки
-                    const startDate = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
-                    const endDate = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
+                    const startDate: string = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
+                    const endDate: string = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
 
                     calendarDateFrom.textContent = startDate;
                     calendarDateTo.textContent = endDate;
@@ -61,39 +69,43 @@ export class Operations {
             });
         //});
 
-        this.createButtonIncome.addEventListener('click', () => {
+        if (this.createButtonIncome) {
+            this.createButtonIncome.addEventListener('click', () => {
                 window.location.href = `#/operations_create?type=income`;
-        })
-        this.createButtonExpenses.addEventListener('click', () => {
-                window.location.href = `#/operations_create?type=expense`;
-        })
-        this.removeModalButton.addEventListener('click', () => {
-            this.deleteOperation()
-        })
+            })
+        }
 
+        if (this.createButtonExpenses) {
+            this.createButtonExpenses.addEventListener('click', () => {
+                window.location.href = `#/operations_create?type=expense`;
+            })
+        }
+        if (this.removeModalButton) {
+            this.removeModalButton.addEventListener('click', () => {
+                this.deleteOperation()
+            })
+        }
 
         this.data = []
-        //this.getOperationsByFilter("day")
     }
 
-    async getOperationsByFilter(period, startDate = null, endDate = null ){
-        const queryParams = new URLSearchParams();
+    private async getOperationsByFilter(period: string, startDate?: string, endDate?: string ): Promise<void> {
+        const queryParams: URLSearchParams = new URLSearchParams();
         queryParams.append("period", period)
 
-        if (period === "interval") {
+        if (period === "interval" && startDate && endDate) {
             queryParams.append("dateFrom", startDate)
             queryParams.append("dateTo", endDate)
         }
 
         try {
-            //const result = await CustomHttp.request(config.host + `/operations?period=${period}`,
-            const result = await CustomHttp.request(config.host + `/operations?${queryParams}`,
+            const result: OperationsResponseType[] = await CustomHttp.request(config.host + `/operations?${queryParams}`,
                 'GET',
             )
             if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
-                }
+                //if (result.error) {
+                //    throw new Error(result.message);
+                //}
                 this.data = result
                 console.log(this.data)
                 this.renderingPage()
@@ -104,8 +116,8 @@ export class Operations {
 
     }
 
-    createRow(item, categoryName) {
-        const row = document.createElement('tr');
+    private createRow(item: OperationsResponseType, categoryName: string): HTMLTableRowElement  {
+        const row: HTMLTableRowElement = document.createElement('tr');
         row.innerHTML = `
                     <th scope="row">${item.id}</th>
                     <td id="type">${item.type}</td>
@@ -134,17 +146,17 @@ export class Operations {
         return row;
     }
 
-    async getOperationById(id) {
+   private async getOperationById(id): Promise<any> {
         try {
             let categoryName;
-            const result = await CustomHttp.request(config.host + `/operations/${id}`,
+            const result: DefaultResponseType | OperationsResponseType = await CustomHttp.request(config.host + `/operations/${id}`,
                 'GET',
             )
             if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
+                if ((result as DefaultResponseType).error) {
+                    throw new Error((result as DefaultResponseType).message);
                 }
-                categoryName = result.category
+                categoryName = (result as OperationsResponseType).category
                 console.log(categoryName)
                 return categoryName
             }
@@ -153,62 +165,64 @@ export class Operations {
         }
     }
 
-     renderingPage() {
-        const operationsTable = document.getElementById('table-body');
-        operationsTable.innerHTML = ''
-        // Проходим по каждому элементу данных и добавляем строчку в таблицу
-        this.data.forEach(item => {
-            this.getOperationById(item.id).then(categoryName => {
-                const row = this.createRow(item, categoryName);
-                operationsTable.appendChild(row);
+     private renderingPage(): void {
+        const operationsTable: HTMLElement | null = document.getElementById('table-body');
+        if (operationsTable) {
+            operationsTable.innerHTML = ''
+            // Проходим по каждому элементу данных и добавляем строчку в таблицу
+            this.data.forEach(item => {
+                this.getOperationById(item.id).then(categoryName => {
+                    const row: HTMLTableRowElement = this.createRow(item, categoryName);
+                    operationsTable.appendChild(row);
+                })
+            });
+            //this.editOperationIcons = document.querySelectorAll('.svg-edit-operation')
+            //this.editOperationIcons.forEach(icon => {
+            operationsTable.addEventListener('click', (event: MouseEvent) => {
+                const icon: HTMLOrSVGImageElement = (event.target as HTMLOrSVGImageElement).closest('.svg-edit-operation');
+                if(icon) {
+                    const row: HTMLTableRowElement = icon.closest('tr');
+                    if(row) {
+                        const th: HTMLTableCellElement = row.querySelector('th')
+                        if(th) {
+                            const operationId: string = th.textContent
+                            const type: string = (row.querySelector(`td[id="type"]`) as HTMLTableCellElement).innerText
+                            const categoryName: string = (row.querySelector(`td[id="categoryName"]`) as HTMLTableCellElement).innerText
+                            const amount: string = (row.querySelector(`td[id="amount"]`) as HTMLTableCellElement).innerText
+                            const date: string = (row.querySelector(`td[id="date"]`) as HTMLTableCellElement).innerText
+                            const comment: string = (row.querySelector(`td[id="comment"]`) as HTMLTableCellElement).innerText
+                            if (operationId) window.location.href = `#/operations_edit?id=${operationId}&type=${type}&categoryName=${categoryName}&amount=${amount}&date=${date}&comment=${comment}`;
+                        }
+                    }
+                    //window.location.href = ``;
+                }
             })
-        });
-        //this.editOperationIcons = document.querySelectorAll('.svg-edit-operation')
-        //this.editOperationIcons.forEach(icon => {
-        operationsTable.addEventListener('click', (event) => {
-            const icon = event.target.closest('.svg-edit-operation');
-            if(icon) {
-                const row = icon.closest('tr');
-                if(row) {
-                    const th = row.querySelector('th')
-                    if(th) {
-                        const operationId = th.textContent
-                        const type = (row.querySelector(`td[id="type"]`)).innerText
-                        const categoryName = (row.querySelector(`td[id="categoryName"]`)).innerText
-                        const amount = (row.querySelector(`td[id="amount"]`)).innerText
-                        const date = (row.querySelector(`td[id="date"]`)).innerText
-                        const comment = (row.querySelector(`td[id="comment"]`)).innerText
-                        if (operationId) window.location.href = `#/operations_edit?id=${operationId}&type=${type}&categoryName=${categoryName}&amount=${amount}&date=${date}&comment=${comment}`;
+            operationsTable.addEventListener('click', (event) => {
+                const icon: HTMLOrSVGImageElement = (event.target as HTMLOrSVGImageElement).closest('.svg-remove-operation')
+                if(icon) {
+                    const row: HTMLTableRowElement = icon.closest('tr');
+                    if(row) {
+                        const th: HTMLTableCellElement = row.querySelector('th')
+                        if(th) {
+                            const operationId: string = th.textContent
+                            if (operationId) window.location.href = `#/finances_and_expenses?id=${operationId}`;
+                        }
                     }
-                }
-                //window.location.href = ``;
-            }
-        })
-        operationsTable.addEventListener('click', (event) => {
-            const icon = event.target.closest('.svg-remove-operation')
-            if(icon) {
-                const row = icon.closest('tr');
-                if(row) {
-                    const th = row.querySelector('th')
-                    if(th) {
-                        const operationId = th.textContent
-                        if (operationId) window.location.href = `#/finances_and_expenses?id=${operationId}`;
-                    }
-                }
 
-            }
-        })
-        //})
+                }
+            })
+        }
+
     }
 
-    async deleteOperation() {
-        const hash = window.location.hash
-        const queryString = hash.split("?")[1]
-        const params = new URLSearchParams(queryString)
-        const operationId = params.get("id")
+    private async deleteOperation(): Promise<void> {
+        const hash: string = window.location.hash
+        const queryString: string = hash.split("?")[1]
+        const params: URLSearchParams = new URLSearchParams(queryString)
+        const operationId: string = params.get("id")
 
         try {
-            const result = await CustomHttp.request(config.host + `/operations/${operationId}`,
+            const result: DefaultResponseType = await CustomHttp.request(config.host + `/operations/${operationId}`,
                 'DELETE',
             )
             if (result) {
@@ -216,37 +230,6 @@ export class Operations {
                     throw new Error(result.message);
                 }
 
-            }
-        } catch (error) {
-            return console.log(error)
-        }
-    }
-
-    async getCategories(){
-
-        try {
-            const income = await CustomHttp.request(config.host + `/categories/${typeOfCategory}`,
-                'GET'
-            )
-            if (income) {
-                if (options.error) {
-                    throw new Error(result.message);
-                }
-                this.income = income
-            }
-        } catch (error) {
-            return console.log(error)
-        }
-
-        try {
-            const expense = await CustomHttp.request(config.host + `/categories/expense`,
-                'GET'
-            )
-            if (income) {
-                if (options.error) {
-                    throw new Error(result.message);
-                }
-                this.expense = expense
             }
         } catch (error) {
             return console.log(error)

@@ -1,7 +1,15 @@
 import {CustomHttp} from "../services/custom-http";
 import config from "../../config/config";
+import {DefaultResponseType} from "../../types/default-response.type";
 
 export class UpdateCategory {
+    private typeOfCategory: "expense" | "income" | "";
+    private readonly page: "expenses" | "finances";
+    private editButton: HTMLElement | null;
+    private declineButton: HTMLElement | null;
+    private inputButton: HTMLElement | null;
+    private readonly categoryName: string;
+
     constructor(page) {
         this.typeOfCategory = ''
         this.page = page
@@ -10,44 +18,47 @@ export class UpdateCategory {
         this.declineButton = document.getElementById('decline-button');
         this.inputButton = document.getElementById("edit-category-name");
 
-        const hash = window.location.hash;
-        const queryString = hash.split('?')[1];
-        const params = new URLSearchParams(queryString);
+        const hash: string = window.location.hash;
+        const queryString: string = hash.split('?')[1];
+        const params: URLSearchParams = new URLSearchParams(queryString);
         //this.categoryId = params.get('id');
         this.categoryName = params.get('category');
-        this.inputButton.value= this.categoryName;
+        (this.inputButton as HTMLInputElement).value= this.categoryName;
 
-        this.editButton.addEventListener('click', () => {
-            if(page==="finances") {
-                this.editCategory()
-                window.location.href = "#/finances"
-            } else if(page === "expenses") {
-                this.editCategory()
-                window.location.href = "#/expenses"
-            } else {
-                window.location.href = "#/"
-            }
-        })
+        if (this.editButton) {
+            this.editButton.addEventListener('click', () => {
+                if(page==="finances") {
+                    this.editCategory()
+                    window.location.href = "#/finances"
+                } else if(page === "expenses") {
+                    this.editCategory()
+                    window.location.href = "#/expenses"
+                } else {
+                    window.location.href = "#/"
+                }
+            })
+        }
 
-        this.declineButton.addEventListener('click', function() {
-            if(page==="finances") {
-                window.location.href = "#/finances"
-            } else if(page === "expenses") {
-                window.location.href = "#/expenses"
-            } else {
-                window.location.href = "#/"
-            }
-        })
+        if (this.declineButton) {
+            this.declineButton.addEventListener('click', function() {
+                if(page==="finances") {
+                    window.location.href = "#/finances"
+                } else if(page === "expenses") {
+                    window.location.href = "#/expenses"
+                } else {
+                    window.location.href = "#/"
+                }
+            })
+        }
+
     }
 
-    async editCategory() {
-        const categoryName = this.inputButton.value;
-        //const categoryId = 5;
-
-        const hash = window.location.hash;
-        const queryString = hash.split('?')[1];
-        const params = new URLSearchParams(queryString);
-        const categoryId = params.get('id');
+    private async editCategory(): Promise<void> {
+        const categoryName: string = (this.inputButton as HTMLInputElement).value;
+        const hash: string = window.location.hash;
+        const queryString: string = hash.split('?')[1];
+        const params: URLSearchParams = new URLSearchParams(queryString);
+        const categoryId: string = params.get('id');
 
         if (this.page === "expenses") {
             this.typeOfCategory = "expense"
@@ -56,7 +67,7 @@ export class UpdateCategory {
         }
 
         try {
-            const result = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}/${categoryId}`,
+            const result: DefaultResponseType = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}/${categoryId}`,
                 'PUT',
                 {
                     title: categoryName
