@@ -1,4 +1,4 @@
-import {Auth} from "./auth.ts";
+import {Auth} from "./auth";
 
 export class CustomHttp {
     public static async request(url: string, method: string = 'GET', body: any = null): Promise<any> {

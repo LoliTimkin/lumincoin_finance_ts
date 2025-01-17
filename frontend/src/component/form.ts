@@ -10,7 +10,7 @@ export class Form {
     private readonly page: "signup" | "login";
     private fields: FormFieldType[];
 
-    constructor(page) {
+    constructor(page: "signup" | "login") {
         this.processElement = null;
         this.page = page;
 

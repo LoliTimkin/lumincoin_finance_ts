@@ -12,8 +12,8 @@ export class Sidebar {
 
     constructor() {
         this.balance = document.getElementById('balance-value');
-        const userElement: HTMLSpanElement = document.querySelector('.custom-user span');
-        if (Auth.getUserInfo()) {
+        const userElement: HTMLSpanElement | null = document.querySelector('.custom-user span');
+        if (Auth.getUserInfo() && userElement) {
             userElement.innerText = (Auth.getUserInfo() as UserInfoType).name
         }
         this.getBalance();
@@ -22,15 +22,16 @@ export class Sidebar {
         this.buttonCategory = document.getElementById('category');
 
         if(this.buttonCategory) {
-            this.buttonCategory.addEventListener('click', () => {
+            const buttonCategory: HTMLAnchorElement = this.buttonCategory as HTMLAnchorElement;
+            buttonCategory.addEventListener('click', () => {
                 this.buttons.forEach(button => button.classList.remove('active'));
-                if ("classList" in this.buttonCategory) {
-                    this.buttonCategory.classList.add('active');
+                if ("classList"  in buttonCategory) {
+                    buttonCategory.classList.add('active');
                 }
                 document.querySelectorAll('.nav-link svg path').forEach((path) => {
                     path.setAttribute('fill', '#052C65');
                 });
-                document.querySelector('.custom-dropdown-toggle path').setAttribute('fill', 'white');
+                document.querySelector('.custom-dropdown-toggle path')?.setAttribute('fill', 'white');
             })
         }
     }

@@ -16,10 +16,13 @@ export class CreateOperation {
 
     constructor() {
         //this.page = page
-        const hash: String = window.location.hash
-        const queryString: String = hash.split("?")[1]
-        const params: URLSearchParams = new URLSearchParams(queryString)
-        const type: String = params.get("type")
+        const hash: string = window.location.hash;
+        const queryString: string = hash.split("?")[1];
+        const params: URLSearchParams = new URLSearchParams(queryString);
+        const type: string = params.get("type") as string;
+        //if (params.get("type")) {
+        //    (this.inputTypeOperation as HTMLInputElement).value = params.get("type")
+        //}
 
         this.createButton = document.getElementById('create-operation');
         this.declineButton = document.getElementById('decline-button');
@@ -29,15 +32,18 @@ export class CreateOperation {
         this.inputSumOperation = document.getElementById('input-sum-operation')
         this.inputDateOperation = document.getElementById('input-date-operation')
 
-        flatpickr(this.inputDateOperation, {
-            mode: "single",
-            dateFormat: "Y-m-d",
-            onClose: (selectedDate)=> {
-                if (selectedDate && this.inputDateOperation) {
-                    this.inputDateOperation.textContent = selectedDate;
+        if (this.inputDateOperation) {
+            flatpickr(this.inputDateOperation, {
+                mode: "single",
+                dateFormat: "Y-m-d",
+                onClose: (selectedDate)=> {
+                    if (selectedDate && this.inputDateOperation) {
+                        this.inputDateOperation.textContent = selectedDate.toString();
+                    }
                 }
-            }
-        });
+            });
+        }
+
         this.inputCommentOperation = document.getElementById('input-comment-operation')
 
         this.getCategories()

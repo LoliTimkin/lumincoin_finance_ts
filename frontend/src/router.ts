@@ -185,7 +185,8 @@ export class Router {
         this.contentElement.innerHTML =
             await fetch(newRoute.page).then(response => response.text())
         this.stylesElement.setAttribute('href', newRoute.styles);
-        this.titleElement.innerText = newRoute.title;
+        if (this.titleElement )
+        (this.titleElement as HTMLDivElement).innerText = newRoute.title;
 
         newRoute.load();
 

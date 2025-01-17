@@ -54,27 +54,28 @@ export class CreateCategory {
 
     private async createCategory(): Promise<void> {
         //const categoryName: string = this.inputButton.value;
-        let result: DefaultResponseType
+        //let result: DefaultResponseType
         if (this.page === "expenses") {
             this.typeOfCategory = "expense"
         } else {
             this.typeOfCategory = "income"
         }
-
         try {
+            if (!this.inputButton) return
             if ("value" in this.inputButton) {
-                 result = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}/`,
+                const result: DefaultResponseType = await CustomHttp.request(config.host + `/categories/${this.typeOfCategory}/`,
                     'POST',
                     {
                         title: this.inputButton.value,
                     }
                 )
-            }
-            if (result) {
-                if (result.error) {
-                    throw new Error(result.message);
+                if (result) {
+                    if (result.error) {
+                        throw new Error(result.message);
+                    }
                 }
             }
+
         } catch (error) {
             return console.log(error)
         }

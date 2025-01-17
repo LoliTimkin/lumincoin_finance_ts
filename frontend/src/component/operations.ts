@@ -2,7 +2,7 @@ import {CustomHttp} from "../services/custom-http";
 import config from "../../config/config";
 import {OperationsResponseType} from "../../types/operations-responce.type";
 import {DefaultResponseType} from "../../types/default-response.type";
-//import flatpickr from "flatpickr";
+import flatpickr from "flatpickr";
 //import "flatpickr/dist/flatpickr.min.css";
 //const flatpickr = require("flatpickr");
 
@@ -24,29 +24,31 @@ export class Operations {
 
         //document.addEventListener("DOMContentLoaded", () => {
             const buttons: NodeListOf<HTMLButtonElement> = document.querySelectorAll(".filter-button"); // Все кнопки
-            let activeButton: HTMLButtonElement = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
+            let activeButton: HTMLButtonElement | null = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
+        if (this.dateRangeBtn) {
+            flatpickr(this.dateRangeBtn, {
+                mode: "range", // Режим выбора диапазона
+                //dateFormat: "d.m.Y", // Формат отображения даты
+                dateFormat: "Y-m-d",
+                onClose: (selectedDates: any)=> {
+                    if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
+                        // Если выбраны обе даты, обновляем кнопки
+                        const startDate: string = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
+                        const endDate: string = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
 
-        flatpickr(this.dateRangeBtn, {
-            mode: "range", // Режим выбора диапазона
-            //dateFormat: "d.m.Y", // Формат отображения даты
-            dateFormat: "Y-m-d",
-            onClose: (selectedDates)=> {
-                if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
-                    // Если выбраны обе даты, обновляем кнопки
-                    const startDate: string = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
-                    const endDate: string = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
+                        calendarDateFrom.textContent = startDate;
+                        calendarDateTo.textContent = endDate;
 
-                    calendarDateFrom.textContent = startDate;
-                    calendarDateTo.textContent = endDate;
-
-                    this.getOperationsByFilter("interval", selectedDates[0], selectedDates[1])
+                        this.getOperationsByFilter("interval", selectedDates[0], selectedDates[1])
+                    }
                 }
-            }
-        });
+            });
+        }
+
 
         // Установить фильтр для активной кнопки по умолчанию
             if (activeButton) {
-                this.getOperationsByFilter(activeButton.dataset.filter);
+                this.getOperationsByFilter(activeButton.dataset.filter as string);
             }
 
             // Назначить обработчик для всех кнопок
@@ -60,7 +62,7 @@ export class Operations {
                         button.classList.add("btn-secondary"); // Установка класса для текущей кнопки
                         button.classList.remove("btn-outline-secondary") //  Удаление неактивного состояния
                         activeButton = button; // Обновление активной кнопки
-                        if (button !== this.dateRangeBtn) {
+                        if (button !== this.dateRangeBtn && button.dataset.filter) {
                             this.getOperationsByFilter(button.dataset.filter); // Применение фильтра
                         }
 
@@ -146,7 +148,7 @@ export class Operations {
         return row;
     }
 
-   private async getOperationById(id): Promise<any> {
+   private async getOperationById(id: number): Promise<any> {
         try {
             let categoryName;
             const result: DefaultResponseType | OperationsResponseType = await CustomHttp.request(config.host + `/operations/${id}`,
@@ -179,13 +181,13 @@ export class Operations {
             //this.editOperationIcons = document.querySelectorAll('.svg-edit-operation')
             //this.editOperationIcons.forEach(icon => {
             operationsTable.addEventListener('click', (event: MouseEvent) => {
-                const icon: HTMLOrSVGImageElement = (event.target as HTMLOrSVGImageElement).closest('.svg-edit-operation');
+                const icon: SVGImageElement | null = (event.target as SVGImageElement).closest('.svg-edit-operation');
                 if(icon) {
-                    const row: HTMLTableRowElement = icon.closest('tr');
+                    const row: HTMLTableRowElement | null = icon.closest('tr');
                     if(row) {
-                        const th: HTMLTableCellElement = row.querySelector('th')
+                        const th: HTMLTableCellElement | null = row.querySelector('th')
                         if(th) {
-                            const operationId: string = th.textContent
+                            const operationId: string = th.textContent ?? "";
                             const type: string = (row.querySelector(`td[id="type"]`) as HTMLTableCellElement).innerText
                             const categoryName: string = (row.querySelector(`td[id="categoryName"]`) as HTMLTableCellElement).innerText
                             const amount: string = (row.querySelector(`td[id="amount"]`) as HTMLTableCellElement).innerText
@@ -198,13 +200,13 @@ export class Operations {
                 }
             })
             operationsTable.addEventListener('click', (event) => {
-                const icon: HTMLOrSVGImageElement = (event.target as HTMLOrSVGImageElement).closest('.svg-remove-operation')
+                const icon: SVGImageElement | null  = (event.target as HTMLOrSVGImageElement).closest('.svg-remove-operation')
                 if(icon) {
-                    const row: HTMLTableRowElement = icon.closest('tr');
+                    const row: HTMLTableRowElement | null = icon.closest('tr');
                     if(row) {
-                        const th: HTMLTableCellElement = row.querySelector('th')
+                        const th: HTMLTableCellElement | null = row.querySelector('th')
                         if(th) {
-                            const operationId: string = th.textContent
+                            const operationId: string | null = th.textContent
                             if (operationId) window.location.href = `#/finances_and_expenses?id=${operationId}`;
                         }
                     }
@@ -219,7 +221,7 @@ export class Operations {
         const hash: string = window.location.hash
         const queryString: string = hash.split("?")[1]
         const params: URLSearchParams = new URLSearchParams(queryString)
-        const operationId: string = params.get("id")
+        const operationId: string = params.get("id") as string
 
         try {
             const result: DefaultResponseType = await CustomHttp.request(config.host + `/operations/${operationId}`,

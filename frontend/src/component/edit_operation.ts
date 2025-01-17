@@ -21,13 +21,13 @@ export class EditOperation {
         const hash: string = window.location.hash;
         const queryString: string = hash.split('?')[1];
         const params: URLSearchParams = new URLSearchParams(queryString);
-        this.operationId = params.get('id');
-        this.type = params.get('type');
-        const categoryName: string = params.get('categoryName');
+        this.operationId = params.get('id') as string;
+        this.type = params.get('type') as string;
+        const categoryName: string = params.get('categoryName') as string;
         //this.categoryName = params.get('categoryName');
-        const amount: string = params.get('amount');
-        const date: string = params.get('date');
-        const comment: string = params.get('comment');
+        const amount: string = params.get('amount') as string;
+        const date: string = params.get('date') as string;
+        const comment: string = params.get('comment') as string;
         this.inputType = document.getElementById('type');
         (this.inputType as HTMLInputElement).value = (this.type === "income")? "Доход": "Расход";
         this.inputCategoryName = document.getElementById('categoryName');
@@ -38,15 +38,17 @@ export class EditOperation {
         this.inputDate = document.getElementById('date');
         (this.inputDate as HTMLInputElement).value = date
 
-        flatpickr(this.inputDate, {
-            mode: "single",
-            dateFormat: "Y-m-d",
-            onClose: (selectedDate)=> {
-                if (selectedDate && this.inputDate) {
-                    this.inputDate.textContent = selectedDate;
+        if (this.inputDate) {
+            flatpickr(this.inputDate, {
+                mode: "single",
+                dateFormat: "Y-m-d",
+                onClose: (selectedDate)=> {
+                    if (selectedDate && this.inputDate) {
+                        this.inputDate.textContent = selectedDate.toString();
+                    }
                 }
-            }
-        });
+            });
+        }
 
         this.inputComment = document.getElementById('comment');
         (this.inputComment as HTMLInputElement).value = comment
@@ -68,7 +70,7 @@ export class EditOperation {
 
     }
 
-    private async updateOperation(categoryId): Promise<void> {
+    private async updateOperation(categoryId: number): Promise<void> {
         const amountWithoutDollar: string = ((this.inputAmount as HTMLInputElement).value).replace('$', '').trim();
 
         try {

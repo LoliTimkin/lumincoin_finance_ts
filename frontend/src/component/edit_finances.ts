@@ -10,10 +10,10 @@ export class EditFinances {
     readonly page: "expenses" | "finances";
     readonly typeOfCategory: "expense" | "income";
     private data: any[];
-    private editButtons: NodeListOf<HTMLElement>;
-    private removeButtons: NodeListOf<HTMLElement>;
+    //private editButtons: NodeListOf<HTMLElement>;
+    //private removeButtons: NodeListOf<HTMLElement>;
 
-    constructor(page) {
+    constructor(page: "expenses" | "finances") {
          this.createButton = document.getElementById('create_item')
          const that: EditFinances = this
          this.removeModalButton = document.getElementById('modal-remove-category')
@@ -37,31 +37,38 @@ export class EditFinances {
     }
 
     private editButtonHandler(): void {
-        this.editButtons.forEach(button => {
+        const editButtons: NodeListOf<HTMLElement> = document.querySelectorAll('.btn-edit');
+        const removeButtons: NodeListOf<HTMLElement> = document.querySelectorAll('.btn-remove')
+
+        editButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 event.preventDefault(); // Предотвращаем стандартное действие ссылки
                 const categoryCard = button.closest('.card');
-                const categoryName = categoryCard.querySelector('.card-title').textContent;
-                const categoryId = categoryCard.querySelector('.btn-edit').id;
-
-                if (this.page === "expenses")  {
-                    window.location.href = `#/edit_expenses?category=${categoryName}&id=${categoryId}`;
-                } else {
-                    window.location.href = `#/edit_finances?category=${categoryName}&id=${categoryId}`;
+                if (categoryCard) {
+                    const categoryName = (categoryCard.querySelector('.card-title') as HTMLElement).textContent;
+                    const categoryId = (categoryCard.querySelector('.btn-edit') as HTMLElement).id;
+                    if (this.page === "expenses")  {
+                        window.location.href = `#/edit_expenses?category=${categoryName}&id=${categoryId}`;
+                    } else {
+                        window.location.href = `#/edit_finances?category=${categoryName}&id=${categoryId}`;
+                    }
                 }
+
             });
         });
 
-        this.removeButtons.forEach(button => {
+        removeButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 event.preventDefault(); // Предотвращаем стандартное действие ссылки
                 const categoryCard = button.closest('.card');
-                const categoryName = categoryCard.querySelector('.card-title').textContent;
-                const categoryId = categoryCard.querySelector('.btn-remove').id;
-                if (this.page === "expenses")  {
-                    window.location.href = `#/expenses?category=${categoryName}&id=${categoryId}`;
-                } else {
-                    window.location.href = `#/finances?category=${categoryName}&id=${categoryId}`;
+                if (categoryCard) {
+                    const categoryName = (categoryCard?.querySelector('.card-title') as HTMLElement).textContent;
+                    const categoryId = (categoryCard?.querySelector('.btn-remove') as HTMLElement).id;
+                    if (this.page === "expenses")  {
+                        window.location.href = `#/expenses?category=${categoryName}&id=${categoryId}`;
+                    } else {
+                        window.location.href = `#/finances?category=${categoryName}&id=${categoryId}`;
+                    }
                 }
             });
         });
@@ -106,13 +113,13 @@ export class EditFinances {
         }
         //  только после рендеринга карточек вешаем обработчики, так как данные с сервера по ним
         // асинхронный код
-        this.editButtons = document.querySelectorAll('.btn-edit');
-        this.removeButtons = document.querySelectorAll('.btn-remove')
+        //this.editButtons = document.querySelectorAll('.btn-edit');
+        //this.removeButtons = document.querySelectorAll('.btn-remove')
 
         this.editButtonHandler()
     }
 
-    private createCard(item): HTMLDivElement {
+    private createCard(item: CategoryResponseType): HTMLDivElement {
         const card: HTMLDivElement = document.createElement('div');
         card.classList.add('col');
         card.innerHTML = `
@@ -135,8 +142,8 @@ export class EditFinances {
         const hash: string = window.location.hash;
         const queryString: string = hash.split('?')[1];
         const params: URLSearchParams = new URLSearchParams(queryString);
-        const categoryId: string = params.get('id');
-        const categoryName:string = params.get('category')
+        const categoryId: string = params.get('id') as string;
+        const categoryName: string = params.get('category') as string;
 
         try {
             //const result = await CustomHttp.request(config.host + `/operations?period=${period}`,
@@ -174,7 +181,7 @@ export class EditFinances {
         }
     }
 
-    private async deleteOperationById(operationId) {
+    private async deleteOperationById(operationId: number): Promise<void> {
 
         try {
             const result: DefaultResponseType = await CustomHttp.request(config.host + `/operations/${operationId}`,

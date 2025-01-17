@@ -10,7 +10,7 @@ export class UpdateCategory {
     private inputButton: HTMLElement | null;
     private readonly categoryName: string;
 
-    constructor(page) {
+    constructor(page: "expenses" | "finances") {
         this.typeOfCategory = ''
         this.page = page
 
@@ -22,7 +22,7 @@ export class UpdateCategory {
         const queryString: string = hash.split('?')[1];
         const params: URLSearchParams = new URLSearchParams(queryString);
         //this.categoryId = params.get('id');
-        this.categoryName = params.get('category');
+        this.categoryName = params.get('category') as string;
         (this.inputButton as HTMLInputElement).value= this.categoryName;
 
         if (this.editButton) {
@@ -58,7 +58,7 @@ export class UpdateCategory {
         const hash: string = window.location.hash;
         const queryString: string = hash.split('?')[1];
         const params: URLSearchParams = new URLSearchParams(queryString);
-        const categoryId: string = params.get('id');
+        const categoryId: string = params.get('id') as string;
 
         if (this.page === "expenses") {
             this.typeOfCategory = "expense"

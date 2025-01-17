@@ -7,19 +7,20 @@ import {
     ArcElement,
     Tooltip,
     Legend,
-    Title
+    Title, ChartConfiguration
 } from 'chart.js';
 import {OperationsResponseType} from "../../types/operations-responce.type";
+import flatpickr from "flatpickr";
 
 Chart.register(PieController, ArcElement, Tooltip, Legend, Title);
 
 export class Main {
     private dateRangeBtn: HTMLElement | null;
-    private incomeCategoryToPercent: Object;
-    private expenseCategoryToPercent: Object;
+    private incomeCategoryToPercent: any
+    private expenseCategoryToPercent: any
     private data: OperationsResponseType[];
-    private myChart: Chart;
-    private myChart2: Chart;
+    //private myChart: Chart;
+    //private myChart2: Chart;
 
     constructor() {
 
@@ -28,32 +29,34 @@ export class Main {
         this.dateRangeBtn = document.getElementById('range-calendar')
 
         const buttons: NodeListOf<HTMLButtonElement> = document.querySelectorAll(".filter-button"); // Все кнопки
-        let activeButton: HTMLButtonElement = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
+        let activeButton: HTMLButtonElement | null = document.querySelector(".filter-button.btn-secondary"); // Кнопка по умолчанию
 
         this.incomeCategoryToPercent = {} // свойство для обработанных данных - доходы
         this.expenseCategoryToPercent = {} // свойство для обработанных данных - расходы
+        this.data = [];
 
+        if (this.dateRangeBtn) {
+            flatpickr(this.dateRangeBtn, {
+                mode: "range", // Режим выбора диапазона
+                dateFormat: "Y-m-d",
+                onClose: (selectedDates: any)=> {
+                    if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
+                        // Если выбраны обе даты, обновляем кнопки
+                        const startDate = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
+                        const endDate = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
 
-        flatpickr(this.dateRangeBtn, {
-            mode: "range", // Режим выбора диапазона
-            dateFormat: "Y-m-d",
-            onClose: (selectedDates)=> {
-                if (selectedDates.length === 2 && calendarDateFrom && calendarDateTo) {
-                    // Если выбраны обе даты, обновляем кнопки
-                    const startDate = selectedDates[0].toLocaleDateString("ru-RU"); // Первая дата
-                    const endDate = selectedDates[1].toLocaleDateString("ru-RU");   // Вторая дата
+                        calendarDateFrom.textContent = startDate;
+                        calendarDateTo.textContent = endDate;
 
-                    calendarDateFrom.textContent = startDate;
-                    calendarDateTo.textContent = endDate;
-
-                    this.getOperationsByFilter("interval", selectedDates[0], selectedDates[1])
+                        this.getOperationsByFilter("interval", selectedDates[0], selectedDates[1])
+                    }
                 }
-            }
-        });
+            });
+        }
 
 // Установить фильтр для активной кнопки по умолчанию
         if (activeButton) {
-            this.getOperationsByFilter(activeButton.dataset.filter);
+            this.getOperationsByFilter(activeButton.dataset.filter as string);
         }
 
 // Назначить обработчик для всех кнопок
@@ -68,7 +71,7 @@ export class Main {
                     button.classList.remove("btn-outline-secondary") //  Удаление неактивного состояния
                     activeButton = button; // Обновление активной кнопки
                     if (button !== this.dateRangeBtn) {
-                        this.getOperationsByFilter(button.dataset.filter);// Применение фильтра
+                        this.getOperationsByFilter(button.dataset.filter as string);// Применение фильтра
                     }
                 }
             });
@@ -113,8 +116,10 @@ export class Main {
         })
         console.log(dataExpense)
 
-        const incomeCategoryCount: object = {};
-        const expenseCategoryCount: object = {};
+        //const incomeCategoryCount: {[key: string]: number} = {};
+        //const expenseCategoryCount: {[key: string]: number} = {};
+        const incomeCategoryCount: any = {};
+        const expenseCategoryCount: any = {};
 
         dataIncome.forEach(item => {
             incomeCategoryCount[item.category] = (incomeCategoryCount[item.category] || 0) + 1;
@@ -164,7 +169,7 @@ export class Main {
                     ]
                 }
             ]
-        };
+        } ;
 
         const expenseData = {
             labels: Object.keys(this.expenseCategoryToPercent),
@@ -183,10 +188,14 @@ export class Main {
             ]
         };
 
-        if (this.myChart) {
-            this.myChart.destroy(); // Удаляем предыдущий график
-        }
-        this.myChart = new Chart(ctx as HTMLCanvasElement, {
+         let myChart: Chart<"pie", number[], string>;
+         let myChart2: Chart<"pie", number[], string>;
+
+        //if (this.myChart) {
+        //    this.myChart.destroy(); // Удаляем предыдущий график
+        //}
+
+        myChart = new Chart(ctx as HTMLCanvasElement, {
             type: 'pie',
             data: incomeData,
             options: {
@@ -196,12 +205,12 @@ export class Main {
                     title: { display: true, text: 'Доходы' }
                 }
             }
-        });
+        } as ChartConfiguration<"pie", number[], string>);
 
-         if (this.myChart2) {
-            this.myChart2.destroy(); // Удаляем предыдущий график
-        }
-        this.myChart2 = new Chart(ctx2 as HTMLCanvasElement, {
+         //if (this.myChart2) {
+         //   this.myChart2.destroy(); // Удаляем предыдущий график
+        //}
+        myChart2 = new Chart(ctx2 as HTMLCanvasElement, {
             type: 'pie',
             data: expenseData,
             options: {
@@ -211,7 +220,7 @@ export class Main {
                     title: {display: true, text: 'Расходы'}
                 }
             }
-        });
+        } as ChartConfiguration<"pie", number[], string>);
     }
 
 }
