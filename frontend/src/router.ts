@@ -173,7 +173,7 @@ export class Router {
             return;
         }
         if (!this.contentElement || !this.stylesElement ||
-            this.titleElement) {
+            !this.titleElement) {
             if (urlRoute === '#/') {
                 return
             } else {
